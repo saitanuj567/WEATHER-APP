@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { city } = req.query;
+  const city = req.query?.city || req.query?.q || '';
   if (!city) {
     res.status(400).json({ message: 'City is required' });
     return;
@@ -30,9 +30,13 @@ module.exports = async (req, res) => {
       try {
         const parsed = JSON.parse(data);
         if (response.statusCode >= 400) {
-          res.status(response.statusCode).json(parsed);
+          res.status(response.statusCode).json({
+            message: parsed.message || 'Weather request failed',
+            code: parsed.cod,
+          });
           return;
         }
+
         res.status(200).json(parsed);
       } catch (error) {
         res.status(500).json({ message: 'Failed to parse weather response' });
